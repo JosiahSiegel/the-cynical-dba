@@ -1,0 +1,34 @@
+
+<div class="clearfix"></div>
+
+<footer class="site-footer txt-center">
+  <hr>
+
+  <ul class="social">
+    {% for item in site.social %}
+      {% for i in item %}
+        <li><a href="{{ i.link }}" target="_blank"><i class="icon icon-{{ i.slug }}"></i></a></li>
+      {% endfor %}
+    {% endfor %}
+  </ul>
+  <style>
+  .icon-mug {
+      display: inline-block;
+      color: #444444;
+      width: 1em;
+      height: 1em;
+      fill: currentColor;
+  }
+  </style>
+  <svg style="position: absolute; width: 0; height: 0; overflow: hidden" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+      <symbol id="icon-mug" viewBox="0 0 32 32">
+      <title>coffee</title>
+      <path d="M30 10h-6v-3c0-2.761-5.373-5-12-5s-12 2.239-12 5v20c0 2.761 5.373 5 12 5s12-2.239 12-5v-3h6c1.105 0 2-0.895 2-2v-10c0-1.105-0.895-2-2-2zM5.502 8.075c-1.156-0.381-1.857-0.789-2.232-1.075 0.375-0.286 1.075-0.694 2.232-1.075 1.811-0.597 4.118-0.925 6.498-0.925s4.688 0.329 6.498 0.925c1.156 0.381 1.857 0.789 2.232 1.075-0.375 0.286-1.076 0.694-2.232 1.075-1.811 0.597-4.118 0.925-6.498 0.925s-4.688-0.329-6.498-0.925zM28 20h-4v-6h4v6z"></path>
+      </symbol>
+    </defs>
+  </svg>
+
+  <small>&copy; {{ site.time | date: '%Y' }}. Made with <a href="http://jekyllrb.com" target="_blank">Jekyll</a> and <svg class="icon-mug"><use xlink:href="#icon-mug"></use></svg>.</small>
+  
+</footer>
