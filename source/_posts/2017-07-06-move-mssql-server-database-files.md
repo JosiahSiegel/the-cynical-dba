@@ -15,7 +15,7 @@ tags:
 You can either read all about moving databases [here][msdn_move_db], or simply follow the 4 steps below:
 
 ### Step 1
- * Get current directory of data/log files
+ * Get current path of data &amp; log files
 
 {% highlight sql %}
 Use master;
@@ -28,7 +28,6 @@ GO
 {% endhighlight %}
 
 ### Step 2
- * Get current directory of data/log files
  * Take database offline
  * `WITH ROLLBACK IMMEDIATE` Tells SQL Server to cancel any pending transactions and to rollback immediately.  Without this termination clause, the SET OFFLINE will wait until all tasks are completed. 
 
@@ -38,7 +37,7 @@ GO
 {% endhighlight %}
 
 ### Step 3
- * Point Data/Log files to the **new** location
+ * Point data &amp; log files to **new** path
 
 {% highlight sql %}
 ALTER DATABASE DatabaseName
