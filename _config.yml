@@ -23,7 +23,7 @@ keywords: "DBA, SQL, Blog, MSSQL, Databases"
 url: http://josiahsiegel.github.io
 baseurl: ""
 domain_name: josiahsiegel.github.io
-# google_analytics: UA-52446115-1
+google_analytics: UA-102162987-1
 repo: https://github.com/JosiahSiegel/JosiahSiegel.github.io.git
 disqus_shortname: "cynical-dba"
 
@@ -32,11 +32,11 @@ author:
   image     : /assets/images/author.jpg
   email     : josiah0601@gmail.com
   url       : https://josiahsiegel.github.io
-  facebook  : http://facebook.com/fernando.dev
-  twitter   : http://twitter.com/nandomoreirame
-  instagram : http://instagram.com/nandomoreira.me
+  facebook  : 
+  twitter   : 
+  instagram : 
   github    : https://github.com/JosiahSiegel
   linkedin  : https://www.linkedin.com/in/josiah-siegel-62b52b24/
-  bio       : "Desenvolvedor Front-end/Wordpress entusiasta de performance, design responsivo e usabilidade, sempre em busca do melhor projeto e de um bom café."
+  bio       : ""
 
 exclude: ["gulp", "node_modules", "bower", "bower_components", "config.rb", "src", "Gemfile", "Gemfile.lock", ".rvmrc", ".rbenv-version", "package.json", "gulpfile.js", "README.md", "Rakefile", "changelog.md"]

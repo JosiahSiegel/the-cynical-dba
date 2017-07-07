@@ -5,15 +5,20 @@ permalink: easy-windows-cluster-lab
 date: 2017-07-06 18:45:15
 comments: true
 description: "Easy Windows Cluster Lab"
-keywords: "MSSQL Server, Vagrant"
-categories: MSSQLServer Vagrant
+keywords: "MSSQLServer, Vagrant, Windows Cluster"
+categories:
 
-tags: 
-- MSSQLServer 
-- Vagrant
+tags:
+
 ---
 
-For those that want a Windows cluster environment, but do not want to read through documentation that was clearly not designed for humans.
+For those that want a Windows cluster environment, but do not want to read through documentation that was clearly not designed for mortals such as myself.
+
+The Vagrantfile below will create a domain controller VM and two cluster node VMs based on the YAML parameters.
+Additional nodes can be added, but this should be done before running `vagrant up` for the first time. 
+
+Be warned that running this environment on a single disk requires considerable throughput and I do not recommend running on your primary system disk.
+Also, security configuration is set for test use only. **NOT FOR PRODUCTION USE!**
 
 ### Basic usage:
 

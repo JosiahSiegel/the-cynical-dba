@@ -16,10 +16,6 @@
     </nav>
     <div class="js-menu-screen sliding-panel-fade-screen"></div>
 
-    <!--<a href="{{ "/" | prepend: site.baseurl }}" class="author-thumb dot">
-      <img src="https://www.gravatar.com/avatar/a423c77a5289af38ef00eccd456ced15" alt="Author thumbnail" class="dot">
-    </a>-->
-
     {% if page.id %}
       <h1 class="page-title">{{ page.title }}</h1>
       <p class="post-meta">{{ page.date | date: "%b %-d, %Y" }}{% if page.author %} • {{ page.author }}{% endif %}{% if page.meta %} • {{ page.meta }}{% endif %}</p>
