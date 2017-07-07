@@ -1,21 +1,18 @@
 ---
 layout: post
-title: "Easy Windows Cluster Lab via Vagrant"
-permalink: easy-windows-cluster-lab
-date: 2017-07-06 18:45:15
+title: "Lazy Windows Cluster Lab"
+permalink: lazy-windows-cluster-lab
+date: 2017-07-07 18:06:23
 comments: true
-description: "Easy Windows Cluster Lab"
-keywords: "MSSQLServer, Vagrant, Windows Cluster"
+description: "Lazy Windows Cluster Lab"
+keywords: "MSSQLServer Vagrant"
 categories:
-
-tags:
-
 ---
 
 For those that want a Windows cluster environment, but do not want to read through documentation that was clearly not designed for mortals such as myself.
 
 The Vagrantfile below will create a domain controller VM and two cluster node VMs based on the YAML parameters.
-Additional nodes can be added, but this should be done before running `vagrant up` for the first time. 
+Additional nodes can be added, but this should be done before running `vagrant up` for the first time.
 
 Be warned that running this environment on a single disk requires considerable throughput and I do not recommend running on your primary system disk.
 Also, security configuration is set for test use only. **NOT FOR PRODUCTION USE!**
@@ -24,12 +21,14 @@ Also, security configuration is set for test use only. **NOT FOR PRODUCTION USE!
 
  * Install Virtualbox
  * Install Vagrant
- * Copy Vagrantfile & user_params.yml to a directory 
+ * Copy Vagrantfile & user_params.yml to a directory
  * Update the YAML file as needed
  * Run `vagrant up` or `vagrant up ClusterDC ClusterNode01 ClusterNode02`
  * The "Create cluster" provision runs on the last node VM
 
 ---
+
+The domain controller houses the file share witness and all VMs are joined to the specified domain.
 
 ![Windows Cluster Env](../images/win_cluster.png)
 
@@ -62,7 +61,6 @@ Also, security configuration is set for test use only. **NOT FOR PRODUCTION USE!
 :timezone:       Eastern Standard Time
 :boot_timeout:   2000
 {% endhighlight %}
-
 
 **Vagrantfile**
 {% highlight ruby %}
@@ -103,7 +101,7 @@ Vagrant.configure("2") do |config|
       v.linked_clone = true
     end
 
-    dc.vm.provision "Configure public network", type: "shell", 
+    dc.vm.provision "Configure public network", type: "shell",
       inline: "netsh interface ipv4 set address 'Ethernet 2' static #{user_params[:dc01][:public_ip]} 255.255.255.0 #{user_params[:default_router]}",
       privileged: false
     dc.vm.provision "Disable firewall|Extend license|Set time", type: "shell",
@@ -141,7 +139,7 @@ Vagrant.configure("2") do |config|
       node.vm.network "private_network", ip: node_id[:private_ip]
       node.vm.network "forwarded_port", guest: 1433, host: 1433, protocol: "tcp", auto_correct: true
 
-      node.vm.provision "Configure public network", type: "shell", 
+      node.vm.provision "Configure public network", type: "shell",
         inline: "netsh interface ipv4 set address 'Ethernet 2' static #{node_id[:public_ip]} 255.255.255.0 #{user_params[:default_router]}",
         privileged: false
       node.vm.provision "Set DNS", type: "shell",
@@ -184,26 +182,26 @@ end
 1. ***The security database on this server does not have a computer account for this workstation***
 
     May occur when logging into node server if domain controller server is built/rebuilt afterwards
-    
+
  * Login with local account and remove server from domain: `netdom remove <server_name> /force`
-    
+
  * Rejoin server to domain: `netdom join <server_name> /domain:<domain_name>`
 
 2. ***Timed out while waiting for the machine to boot.***
-    
+
     Connection lost to VM.
-    
+
  * Force close VM and run `vagrant up` or `vagrant up --provision` if the initial setup did not complete
-    
+
 3. ***Install-WindowsFeature : The FeatureType code is out of range***
 
     Potential corrupt cache registry key
 
  * Force close VM and run `vagrant up` or `vagrant up --provision` if the initial setup did not complete
-    
+
 4. ***The guest machine entered an invalid state while waiting for it to boot.***
 
     Known to occur after the "Join domain" provision and restart
-    
- * Run `vagrant up --provision` or if you know the specific missing provision `vagrant up --provision-with "Setup storage"`
 
+ * Run `vagrant up --provision` or if you know the specific missing provision `vagrant up --provision-with "Setup storage"`
+ 
