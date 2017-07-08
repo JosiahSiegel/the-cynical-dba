@@ -16,11 +16,11 @@ cover: /assets/images/default-cover.png
 
 # site title, description, meta_description, meta_keywords
 # Details for the RSS feed generator
-name: cynical_dba
-title: cynical_dba
+name: the_cynical_dba
+title: the_cynical_dba
 description: "SQL and other things"
 keywords: "DBA, SQL, Blog, MSSQL, Databases"
-url: http://www.thecynicaldba.com
+url: http://thecynicaldba.com
 baseurl: ""
 domain_name: thecynicaldba.com
 google_analytics: UA-102162987-1
@@ -31,7 +31,7 @@ author:
   name      : Josiah Siegel
   image     : /assets/images/author.jpg
   email     : josiah0601@gmail.com
-  url       : http://www.thecynicaldba.com
+  url       : http://thecynicaldba.com
   facebook  : 
   twitter   : 
   instagram : 
