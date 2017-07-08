@@ -20,18 +20,18 @@ name: cynical_dba
 title: cynical_dba
 description: "SQL and other things"
 keywords: "DBA, SQL, Blog, MSSQL, Databases"
-url: http://josiahsiegel.github.io
+url: http://www.thecynicaldba.com
 baseurl: ""
-domain_name: josiahsiegel.github.io
+domain_name: thecynicaldba.com
 google_analytics: UA-102162987-1
-repo: https://github.com/JosiahSiegel/JosiahSiegel.github.io.git
+repo: https://github.com/JosiahSiegel/the-cynical-dba.git
 disqus_shortname: "cynical-dba"
 
 author:
   name      : Josiah Siegel
   image     : /assets/images/author.jpg
   email     : josiah0601@gmail.com
-  url       : https://josiahsiegel.github.io
+  url       : http://www.thecynicaldba.com
   facebook  : 
   twitter   : 
   instagram : 
