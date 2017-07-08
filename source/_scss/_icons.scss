@@ -56,4 +56,11 @@ $icon-github: "\e90f";
 .icon-twitter-rounded:before { content: $icon-twitter-rounded; }
 .icon-feed:before { content: $icon-feed; }
 .icon-github:before { content: $icon-github; }
+.icon-mug {
+  display: inline-block;
+  color: #444444;
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
 
