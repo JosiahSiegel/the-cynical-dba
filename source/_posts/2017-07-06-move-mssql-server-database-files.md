@@ -4,15 +4,15 @@ title: "Move MSSQL Server Database Files"
 permalink: move-mssql-server-database-files
 date: 2017-07-06 12:21:44
 comments: true
-description: "Move MSSQL Server Database Files"
+description: "Move MSSQL Server database files in 4 steps."
 keywords: ""
-categories:
+category: MSSQLServer
 
 tags:
 
 ---
 
-You can either read all about moving databases [here][msdn_move_db], or simply follow the 4 steps below:
+You can either read all about moving databases on [msdn][msdn_move_db], or simply follow the 4 steps below:
 
 ### Step 1
  * Get current path of data &amp; log files

@@ -4,9 +4,9 @@ title: "Query MSSQL Server Error Log"
 permalink: query-mssql-server-error-log
 date: 2017-07-05 19:54:20
 comments: true
-description: "Query MSSQL Server Error Log"
+description: "Complex filtering of MSSQL Server error log through T-SQL."
 keywords: "MSSQLServer"
-categories:
+category: MSSQLServer Log
 
 tags:
 

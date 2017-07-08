@@ -92,7 +92,7 @@ task :post do
     post.puts "comments: true"
     post.puts "description: \"#{title}\""
     post.puts 'keywords: ""'
-    post.puts "categories:"
+    post.puts "category:"
     post.puts "#{categories}"
     post.puts "tags:"
     post.puts "#{tags}"

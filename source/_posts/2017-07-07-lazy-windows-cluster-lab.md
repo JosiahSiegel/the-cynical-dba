@@ -4,9 +4,11 @@ title: "Lazy Windows Cluster Lab"
 permalink: lazy-windows-cluster-lab
 date: 2017-07-07 18:06:23
 comments: true
-description: "Lazy Windows Cluster Lab"
-keywords: "MSSQLServer Vagrant"
-categories:
+description: "Run your own Windows cluster lab via Vagrant."
+keywords: "Windows, Cluster, Vagrant"
+category: Windows Vagrant
+tags:
+- domain
 ---
 
 For those that want a Windows cluster environment, but do not want to read through documentation that was clearly not designed for mortals such as myself.

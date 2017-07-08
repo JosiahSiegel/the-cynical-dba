@@ -21,7 +21,7 @@ title: the_cynical_dba
 description: "SQL and other things"
 keywords: "DBA, SQL, Blog, MSSQL, Databases"
 url: http://thecynicaldba.com
-baseurl: ""
+baseurl: "/the-cynical-dba"
 domain_name: thecynicaldba.com
 google_analytics: UA-102162987-1
 repo: https://github.com/JosiahSiegel/the-cynical-dba.git
