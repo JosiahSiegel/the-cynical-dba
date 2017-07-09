@@ -19,10 +19,10 @@ Additional nodes can be added, but this should be done before running `vagrant u
 Be warned that running this environment on a single disk requires considerable throughput and I do not recommend running on your primary system disk.
 Also, security configuration is set for test use only. **NOT FOR PRODUCTION USE!**
 
-### Basic usage:
+## Basic usage:
 
  * Install Virtualbox
- * Install Vagrant
+ * Install Vagrant (>= 1.9.4)
  * Copy Vagrantfile & user_params.yml to a directory
  * Update the YAML file as needed
  * Run `vagrant up` or `vagrant up ClusterDC ClusterNode01 ClusterNode02`
@@ -34,7 +34,7 @@ The domain controller houses the file share witness and all VMs are joined to th
 
 ![Windows Cluster Env](../images/win_cluster.png)
 
-**user_params.yml**
+**user_params.yml** - Update addresses if necessary
 {% highlight yaml %}
 :dc01:
   :name:         ClusterDC
@@ -168,7 +168,7 @@ Vagrant.configure("2") do |config|
 end
 {% endhighlight %}
 
-### MSSQL Server Failover Cluster Tips:
+## MSSQL Server Failover Cluster Tips:
 
  * Enable "AlwaysOn" for each SQL instance within configuration manager
  * Run SQL Server instances under static port `1433`
@@ -179,31 +179,31 @@ end
 
 ---
 
-### Errors:
+## Errors:
 
 1. ***The security database on this server does not have a computer account for this workstation***
 
-    May occur when logging into node server if domain controller server is built/rebuilt afterwards
+   : May occur when logging into node server if domain controller server is built/rebuilt afterwards
 
- * Login with local account and remove server from domain: `netdom remove <server_name> /force`
+   * Login with local account and remove server from domain: `netdom remove <server_name> /force`
 
- * Rejoin server to domain: `netdom join <server_name> /domain:<domain_name>`
+   * Rejoin server to domain: `netdom join <server_name> /domain:<domain_name>`
 
 2. ***Timed out while waiting for the machine to boot.***
 
-    Connection lost to VM.
+   : Connection lost to VM
 
- * Force close VM and run `vagrant up` or `vagrant up --provision` if the initial setup did not complete
+   * Force close VM and run `vagrant up` or `vagrant up --provision` if the initial setup did not complete
 
 3. ***Install-WindowsFeature : The FeatureType code is out of range***
 
-    Potential corrupt cache registry key
+   : Potential corrupt cache registry key
 
- * Force close VM and run `vagrant up` or `vagrant up --provision` if the initial setup did not complete
+   * Force close VM and run `vagrant up` or `vagrant up --provision` if the initial setup did not complete
 
 4. ***The guest machine entered an invalid state while waiting for it to boot.***
 
-    Known to occur after the "Join domain" provision and restart
+   : Known to occur after the "Join domain" provision and restart
 
- * Run `vagrant up --provision` or if you know the specific missing provision `vagrant up --provision-with "Setup storage"`
+   * Run `vagrant up --provision` or if you know the specific missing provision `vagrant up --provision-with "Setup storage"`
  

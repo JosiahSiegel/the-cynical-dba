@@ -17,7 +17,7 @@ What about when you're only able to login through a DAC?
 
 Sometimes it's best to start out by running T-SQL scripts to see what's going on before you start making changes (adding monitoring applications and/or stored procedures).
 
-**Running queries and jobs**
+### **Running queries and jobs:**
 
 {% highlight sql %}
 SELECT
@@ -56,7 +56,9 @@ What matters:
 
 ![Running Queries](../images/running_queries.png){:class="img-border"}
 
-**File space for selected database**
+---
+
+### **File space for selected database:**
 
 {% highlight sql %}
 SELECT 
@@ -72,7 +74,9 @@ What matters:
 
 ![Database File Size](../images/db_file_size.png){:class="img-border"}
 
-**Running commands (with % complete)**
+---
+
+### **Running commands (with % complete):**
 
 {% highlight sql %}
 SELECT

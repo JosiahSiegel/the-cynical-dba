@@ -26,6 +26,7 @@ DECLARE @temp_error_log TABLE
 INSERT INTO @temp_error_log
 EXEC sp_readerrorlog 0, 1, 'Login failed' 
 
+
 SELECT * FROM @temp_error_log 
 ORDER BY date DESC
 {% endhighlight %}
