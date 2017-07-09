@@ -4,15 +4,16 @@ title: "What to do: All users are sysadmin"
 permalink: what-to-do-all-users-are-sysadmin
 date: 2017-07-09 19:04:24
 comments: true
-description: "What to do: All users are sysadmin"
+description: "A time bomb with a blast radius encompassing your career"
 keywords: "MSSQLServer, permissions"
 category: MSSQLServer
 
 tags:
+- permissions
 
 ---
 
-Your first day on the job and all appears calm on the surface, until you learn that all **users were previously assigned a shared login with sysadmin permissions**. A time bomb with a blast radius encompassing your newfound career.
+Your first day on the job and all appears calm on the surface, until you learn that all **users were previously assigned a shared login with sysadmin permissions**. A time bomb with a blast radius encompassing your career.
 
 ## 1. Keep calm
    More than likely you were hired to help bring stability where you work. Do your best to appear in control...even though the opposite is true at the moment.
