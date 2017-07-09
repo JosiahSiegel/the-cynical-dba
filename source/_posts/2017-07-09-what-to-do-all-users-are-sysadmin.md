@@ -7,10 +7,8 @@ comments: true
 description: "A time bomb with a blast radius encompassing your career"
 keywords: "MSSQLServer, permissions"
 category: MSSQLServer
-
 tags:
 - permissions
-
 ---
 
 Your first day on the job and all appears calm on the surface, until you learn that all **users were previously assigned a shared login with sysadmin permissions**. A time bomb with a blast radius encompassing your career.
