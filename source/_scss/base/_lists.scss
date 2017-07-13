@@ -1,8 +1,8 @@
 ul,
 ol {
   margin: 0;
-  padding: 0;
-
+  padding-left: 20px;
+  
   &%default-ul {
     margin-bottom: $small-spacing;
     padding-left: $base-spacing;
