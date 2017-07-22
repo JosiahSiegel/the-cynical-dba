@@ -10,5 +10,6 @@ permalink: /author/
 Josiah Siegel
 </div>
 
-![Microsoft Certified Professional](../images/MS_Cert_Professional_logo_Blk_rgb.png){:width="120px" class="img-center"}
+<br/>
+![Microsoft Certified Solutions Associate](../images/MCSA SQL 2016-DataAdmin-logo-Blk.png){:width="120px" class="img-center"}
 
