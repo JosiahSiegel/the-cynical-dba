@@ -62,11 +62,9 @@ SET STATISTICS IO ON;
 SELECT * FROM [LobTest]
 {% endhighlight %}
 
->### Non-LOB output
->
->| alloc_unit  | page_count | logical_reads | lob_logical_reads |
->|:------------|:----------:|:-------------:|------------------:|
->| IN_ROW_DATA | 9999       | **10037**     | 0                 |
+>| alloc_unit  | page_count | logical_reads |
+>|:------------|:----------:|--------------:|
+>| IN_ROW_DATA | 9999       | **10037**     |
 
 # LOB rows (`VARCHAR(8001)`)
 {% highlight sql %}
@@ -91,12 +89,10 @@ SET STATISTICS IO ON;
 SELECT * FROM [LobTest]
 {% endhighlight %}
 
->### LOB output
->
->| alloc_unit  | page_count | logical_reads | lob_logical_reads |
->|:------------|:----------:|:-------------:|------------------:|
->| IN_ROW_DATA | 52         | 54            | 0                 |
->| LOB_DATA    | 9999       | 0             | **29609**         |
+>| alloc_unit  | page_count | logical_reads |
+>|:------------|:----------:|--------------:|
+>| IN_ROW_DATA | 52         | 54            |
+>| LOB_DATA    | 9999       | **29609**     |
 
 # Conclusion
 
