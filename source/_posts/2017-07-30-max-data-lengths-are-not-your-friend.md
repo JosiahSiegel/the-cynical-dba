@@ -101,5 +101,5 @@ SELECT * FROM [LobTest]
 # Conclusion
 
 With non-LOB rows, the output resulted in 10,037 logical reads. 
-The LOB rows resulted in 26,609 logical reads, as values were then stored in the `LOB_DATA` allocation unit.
+The LOB rows resulted in 29,609 logical reads, as values were then stored in the `LOB_DATA` allocation unit.
 
