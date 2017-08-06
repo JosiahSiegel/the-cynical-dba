@@ -105,21 +105,47 @@ Vagrant.configure("2") do |config|
       v.customize ["storagectl", :id, "--name", "IDE Controller", "--hostiocache", user_params[:host_cache]]
     end
 
-    dc.vm.provision "Configure public network", type: "shell",
-      inline: "netsh interface ipv4 set address 'Ethernet 2' static #{user_params[:dc01][:public_ip]} 255.255.255.0 #{user_params[:default_router]}",
+    dc.vm.provision "Configure public network", type: "shell", 
+      inline: "netsh interface ipv4 set address 'Ethernet 2' static #{user_params[:dc01][:public_ip]} \
+      255.255.255.0 #{user_params[:default_router]}",
       privileged: false
-    dc.vm.provision "Disable firewall|Extend license|Set time", type: "shell",
-      inline: "Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False; slmgr -rearmpause; Set-TimeZone \"#{user_params[:timezone]}\""
+    dc.vm.provision "Disable firewall|Set time", type: "shell",
+      inline: "Set-NetFirewallProfile \
+      -Profile Domain,Public,Private \
+      -Enabled False; \
+      Set-TimeZone \"#{user_params[:timezone]}\""
     dc.vm.provision "Install AD", type: "shell",
-      inline: "Install-windowsfeature -name AD-Domain-Services -IncludeManagementTools -Source 'C:\\Windows\\WinSxS'",
+      inline: "Install-windowsfeature \
+      -name AD-Domain-Services \
+      -IncludeManagementTools \
+      -Source 'C:\\Windows\\WinSxS'",
       privileged: false
     dc.vm.provision "Install domain", type: "shell",
-      inline: "Install-ADDSForest -CreateDnsDelegation:$false -DatabasePath 'C:\\Windows\\NTDS' -DomainName '#{user_params[:domain][:name]}' -DomainNetbiosName '#{user_params[:domain][:netbios_name]}' -safemodeadministratorpassword (convertto-securestring '#{user_params[:domain][:pass]}' -asplaintext -force) -InstallDns:$true -LogPath 'C:\\Windows\\NTDS' -NoRebootOnCompletion:$true -SysvolPath 'C:\\Windows\\SYSVOL' -Force:$true"
+      inline: "Install-ADDSForest \
+      -CreateDnsDelegation:$false \
+      -DatabasePath 'C:\\Windows\\NTDS' \
+      -DomainName '#{user_params[:domain][:name]}' \
+      -DomainNetbiosName '#{user_params[:domain][:netbios_name]}' \
+      -safemodeadministratorpassword (convertto-securestring '#{user_params[:domain][:pass]}' -asplaintext -force) \
+      -InstallDns:$true \
+      -LogPath 'C:\\Windows\\NTDS' \
+      -NoRebootOnCompletion:$true \
+      -SysvolPath 'C:\\Windows\\SYSVOL' \
+      -Force:$true"
     dc.vm.provision :reload
     dc.vm.provision "Add reverse lookup zone", type: "shell",
-      inline: "Start-Sleep -s 120; Add-DnsServerPrimaryZone -DynamicUpdate Secure -NetworkId '#{reverse_lookup_ip}' -ReplicationScope Domain"
+      inline: "Start-Sleep -s 120; \
+      Add-DnsServerPrimaryZone \
+      -DynamicUpdate Secure \
+      -NetworkId '#{reverse_lookup_ip}' \
+      -ReplicationScope Domain"
     dc.vm.provision  "Create file share witness", type: "shell",
-      inline: "New-Item \"C:\\FileShareWitness\" -type directory; New-SMBShare -Name \"FileShareWitness\" -Path \"C:\\FileShareWitness\" -FullAccess #{user_params[:domain][:name]}\\administrator, #{user_params[:domain][:name]}\\vagrant"
+      inline: "New-Item \"C:\\FileShareWitness\" \
+      -type directory; \
+      New-SMBShare \
+      -Name \"FileShareWitness\" \
+      -Path \"C:\\FileShareWitness\" \
+      -FullAccess #{user_params[:domain][:name]}\\administrator, #{user_params[:domain][:name]}\\vagrant"
   end
 
   (1..user_params[:nodes].count).each do |i|
@@ -144,26 +170,41 @@ Vagrant.configure("2") do |config|
       node.vm.network "private_network", ip: node_id[:private_ip]
       node.vm.network "forwarded_port", guest: 1433, host: 1433, protocol: "tcp", auto_correct: true
 
-      node.vm.provision "Configure public network", type: "shell",
-        inline: "netsh interface ipv4 set address 'Ethernet 2' static #{node_id[:public_ip]} 255.255.255.0 #{user_params[:default_router]}",
+      node.vm.provision "Configure public network", type: "shell", 
+        inline: "netsh interface ipv4 set address 'Ethernet 2' static #{node_id[:public_ip]} \
+        255.255.255.0 #{user_params[:default_router]}",
         privileged: false
       node.vm.provision "Set DNS", type: "shell",
         inline: "netsh interface ipv4 set dns 'Ethernet 2' static #{user_params[:dc01][:public_ip]}",
         privileged: false
       node.vm.provision "Install Failover Cluster", type: "shell",
-        inline: "Install-WindowsFeature -Name Failover-Clustering -IncludeManagementTools -Source 'C:\\Windows\\WinSxS'",
+        inline: "Install-WindowsFeature \
+        -Name Failover-Clustering \
+        -IncludeManagementTools \
+        -Source 'C:\\Windows\\WinSxS'",
         privileged: false
       node.vm.provision "Install NET 3_5", type: "shell",
-        inline: "Install-WindowsFeature Net-Framework-Core -Source 'C:\\Windows\\WinSxS'",
+        inline: "Install-WindowsFeature Net-Framework-Core \
+        -Source 'C:\\Windows\\WinSxS'",
         privileged: false
-      node.vm.provision "Disable firewall|Extend license|Set time", type: "shell",
-        inline: "Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False; slmgr -rearmpause; Set-TimeZone \"#{user_params[:timezone]}\""
+      node.vm.provision "Disable firewall|Set time", type: "shell",
+        inline: "Set-NetFirewallProfile \
+        -Profile Domain,Public,Private \
+        -Enabled False; \
+        Set-TimeZone \"#{user_params[:timezone]}\""
       node.vm.provision "Join domain", type: "shell",
         inline: "netdom join #{node_id[:name]} /domain:#{user_params[:domain][:name]}"
       node.vm.provision :reload
       if i.equal?((1..user_params[:nodes].count).last)
         node.vm.provision  "Create cluster", type: "shell",
-          inline: "New-Cluster -Name #{user_params[:cluster][:name]} -NoStorage -Node #{cluster_nodes} -StaticAddress #{user_params[:cluster][:ip]} -IgnoreNetwork 10.0.2.0/24; Set-ClusterQuorum -NodeAndFileShareMajority \\\\CLUSTERDC\\FileShareWitness"
+          inline: "New-Cluster \
+          -Name #{user_params[:cluster][:name]} \
+          -NoStorage \
+          -Node #{cluster_nodes} \
+          -StaticAddress #{user_params[:cluster][:ip]} \
+          -IgnoreNetwork 10.0.2.0/24; \
+          Set-ClusterQuorum \
+          -NodeAndFileShareMajority \\\\CLUSTERDC\\FileShareWitness"
       end
     end
   end
