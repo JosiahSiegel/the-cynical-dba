@@ -61,7 +61,8 @@ The domain controller houses the file share witness and all VMs are joined to th
 
 :default_router: 192.168.0.1
 :timezone:       Eastern Standard Time
-:boot_timeout:   2000
+:boot_timeout:   3000
+:host_cache:     'on'
 {% endhighlight %}
 
 **Vagrantfile**
@@ -101,6 +102,7 @@ Vagrant.configure("2") do |config|
 
     dc.vm.provider :virtualbox do |v|
       v.linked_clone = true
+      v.customize ["storagectl", :id, "--name", "IDE Controller", "--hostiocache", user_params[:host_cache]]
     end
 
     dc.vm.provision "Configure public network", type: "shell",
@@ -135,6 +137,7 @@ Vagrant.configure("2") do |config|
 
       node.vm.provider :virtualbox do |v|
         v.linked_clone = true
+        v.customize ["storagectl", :id, "--name", "IDE Controller", "--hostiocache", user_params[:host_cache]]
       end
 
       node.vm.network "public_network", ip: node_id[:public_ip], auto_config: false
@@ -168,14 +171,23 @@ Vagrant.configure("2") do |config|
 end
 {% endhighlight %}
 
+## General Tips:
+
+ * Set `:host_cache: 'off'` within the `user_params.yml` configuration file if you experience poor host disk performance.
+   The VMs will use considerably less host OS Cache, but run the risk of *entering an invalid state* due to a decrease in VM performance.
+ * If the Windows license has expired, login as the **non-domain** vagrant user and run `extend-trial.cmd` on the desktop.
+ * You can access each complete node using logins `<domain name>\administrator` or `<domain name>\vagrant`. 
+
+---
+
 ## MSSQL Server Failover Cluster Tips:
 
  * Enable "AlwaysOn" for each SQL instance within configuration manager
  * Run SQL Server instances under static port `1433`
  * Run SQL Server instances under a domain user
- * Run listener under static port `192.168.0.209`
- * If primary instance fails, force failover with: `ALTER AVAILABILITY GROUP <AG Name> FORCE_FAILOVER_ALLOW_DATA_LOSS;`
- * After primary (now secondary) instance is online after a forced failover, re-synchronize database with: `ALTER DATABASE <Database Name> SET HADR RESUME;`
+ * Run listener under a static port. For example: `192.168.0.209`
+ * If primary instance fails, force failover with: `ALTER AVAILABILITY GROUP <AG Name> FORCE_FAILOVER_ALLOW_DATA_LOSS;`.
+   After primary (now secondary) instance is online after a forced failover, re-synchronize database with: `ALTER DATABASE <Database Name> SET HADR RESUME;`
 
 ---
 
