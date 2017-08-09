@@ -36,10 +36,15 @@ The domain controller houses the file share witness and all VMs are joined to th
 
 **user_params.yml** - Update addresses if necessary
 {% highlight yaml %}
+:box:            jacqinthebox/windowsserver2016
+:timezone:       Eastern Standard Time
+:boot_timeout:   3000
+:virtualbox:
+  :controller:   IDE Controller
+  :host_cache:   'off'
 :dc01:
   :name:         ClusterDC
   :public_ip:    192.168.0.210
-
 :nodes:
   :node1:
     :name:       ClusterNode01
@@ -49,20 +54,14 @@ The domain controller houses the file share witness and all VMs are joined to th
     :name:       ClusterNode02
     :public_ip:  192.168.0.212
     :private_ip: 192.168.2.12
-
 :domain:
   :name:         devenv.local
   :netbios_name: DEVENV
   :pass:         D3vp@ss
-
 :cluster:
   :name:         DevCluster
   :ip:           192.168.0.200
-
 :default_router: 192.168.0.1
-:timezone:       Eastern Standard Time
-:boot_timeout:   3000
-:host_cache:     'on'
 {% endhighlight %}
 
 **Vagrantfile**
@@ -70,15 +69,11 @@ The domain controller houses the file share witness and all VMs are joined to th
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 require 'yaml'
-
 Vagrant.require_version ">= 1.9.4"
-
 user_params = YAML.load_file('user_params.yml')
 cluster_nodes = user_params[:nodes].map { |key, value| value[:name] }.join(',')
 reverse_lookup_ip = user_params[:dc01][:public_ip].sub(/(.*)\b#{user_params[:dc01][:public_ip].split('.')[3]}\b/i, '\10')
-
 required_plugins = %w(vagrant-reload)
-
 plugins_to_install = required_plugins.select { |plugin| not Vagrant.has_plugin? plugin }
 if not plugins_to_install.empty?
   puts "Installing plugins: #{plugins_to_install.join(' ')}"
@@ -88,23 +83,21 @@ if not plugins_to_install.empty?
     abort "Installation of one or more plugins has failed. Aborting."
   end
 end
-
 Vagrant.configure("2") do |config|
-
   config.vm.define user_params[:dc01][:name] do |dc|
-    dc.vm.box = "jacqinthebox/windowsserver2016"
+    dc.vm.box = user_params[:box]
     dc.vm.hostname = user_params[:dc01][:name]
     dc.vm.boot_timeout = user_params[:boot_timeout]
     dc.winrm.transport = :plaintext
     dc.winrm.basic_auth_only = true
-
     dc.vm.network "public_network", ip: user_params[:dc01][:public_ip], auto_config: false
-
     dc.vm.provider :virtualbox do |v|
       v.linked_clone = true
-      v.customize ["storagectl", :id, "--name", "IDE Controller", "--hostiocache", user_params[:host_cache]]
+      v.customize ["storagectl", :id, "--name", user_params[:virtualbox][:controller], 
+        "--hostiocache", user_params[:virtualbox][:host_cache]]
     end
-
+    dc.vm.provision "Renew OS License", type: "shell",
+      inline: "Start-Sleep -s 120; slmgr.vbs /rearm"
     dc.vm.provision "Configure public network", type: "shell", 
       inline: "netsh interface ipv4 set address 'Ethernet 2' static #{user_params[:dc01][:public_ip]} \
       255.255.255.0 #{user_params[:default_router]}",
@@ -133,12 +126,6 @@ Vagrant.configure("2") do |config|
       -SysvolPath 'C:\\Windows\\SYSVOL' \
       -Force:$true"
     dc.vm.provision :reload
-    dc.vm.provision "Add reverse lookup zone", type: "shell",
-      inline: "Start-Sleep -s 120; \
-      Add-DnsServerPrimaryZone \
-      -DynamicUpdate Secure \
-      -NetworkId '#{reverse_lookup_ip}' \
-      -ReplicationScope Domain"
     dc.vm.provision  "Create file share witness", type: "shell",
       inline: "New-Item \"C:\\FileShareWitness\" \
       -type directory; \
@@ -146,13 +133,16 @@ Vagrant.configure("2") do |config|
       -Name \"FileShareWitness\" \
       -Path \"C:\\FileShareWitness\" \
       -FullAccess #{user_params[:domain][:name]}\\administrator, #{user_params[:domain][:name]}\\vagrant"
+    dc.vm.provision "Add reverse lookup zone", type: "shell",
+      inline: "Start-Sleep -s 600; \
+      Add-DnsServerPrimaryZone \
+      -NetworkId '#{reverse_lookup_ip}' \
+      -ReplicationScope Domain"
   end
-
   (1..user_params[:nodes].count).each do |i|
     node_id = eval("user_params[:nodes][:node#{i}]")
     config.vm.define node_id[:name] do |node|
-      node.vm.box = "jacqinthebox/windowsserver2016"
-
+      node.vm.box = user_params[:box]
       node.vm.hostname = node_id[:name]
       node.vm.boot_timeout = user_params[:boot_timeout]
       node.winrm.timeout = user_params[:boot_timeout]
@@ -160,16 +150,16 @@ Vagrant.configure("2") do |config|
       node.winrm.basic_auth_only = true
       node.winrm.retry_delay = 30
       node.winrm.ssl_peer_verification = false
-
       node.vm.provider :virtualbox do |v|
         v.linked_clone = true
-        v.customize ["storagectl", :id, "--name", "IDE Controller", "--hostiocache", user_params[:host_cache]]
+        v.customize ["storagectl", :id, "--name", user_params[:virtualbox][:controller], 
+          "--hostiocache", user_params[:virtualbox][:host_cache]]
       end
-
       node.vm.network "public_network", ip: node_id[:public_ip], auto_config: false
       node.vm.network "private_network", ip: node_id[:private_ip]
       node.vm.network "forwarded_port", guest: 1433, host: 1433, protocol: "tcp", auto_correct: true
-
+      node.vm.provision "Renew OS License", type: "shell",
+        inline: "Start-Sleep -s 120; slmgr.vbs /rearm"
       node.vm.provision "Configure public network", type: "shell", 
         inline: "netsh interface ipv4 set address 'Ethernet 2' static #{node_id[:public_ip]} \
         255.255.255.0 #{user_params[:default_router]}",
@@ -208,14 +198,13 @@ Vagrant.configure("2") do |config|
       end
     end
   end
-
 end
 {% endhighlight %}
 
 ## General Tips:
 
- * Set `:host_cache: 'off'` within the `user_params.yml` configuration file if you experience poor host disk performance.
-   The VMs will use considerably less host OS Cache, but run the risk of *entering an invalid state* due to a decrease in VM performance.
+ * Set `:host_cache: 'on'` within the `user_params.yml` configuration file if you experience poor host disk performance.
+   This may lead to considerably high host drive activity.
  * If the Windows license has expired, login as the **non-domain** vagrant user and run `extend-trial.cmd` on the desktop.
  * You can access each complete node using logins `<domain name>\administrator` or `<domain name>\vagrant`. 
 
