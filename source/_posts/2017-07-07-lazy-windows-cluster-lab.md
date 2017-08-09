@@ -203,7 +203,7 @@ end
 
 ## General Tips:
 
- * Set `:host_cache: 'on'` within the `user_params.yml` configuration file if you experience poor host disk performance.
+ * Set `:host_cache: 'on'` within the `user_params.yml` configuration file if you experience poor VM performance.
    This may lead to considerably high host drive activity.
  * If the Windows license has expired, login as the **non-domain** vagrant user and run `extend-trial.cmd` on the desktop.
  * You can access each complete node using logins `<domain name>\administrator` or `<domain name>\vagrant`. 
