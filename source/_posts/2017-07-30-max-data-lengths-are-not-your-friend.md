@@ -12,35 +12,29 @@ tags:
 
 ---
 If you want to maintain predictable query performance, shy away from data lengths that may force data to be pushed off-row.
-Values that are under 8,000 bytes will remain on-row. 
-Any rows that are greater than 8,000 bytes will be allocated as `LOB_DATA` and may incur a read/write penalty. 
-This is due to an increase in the number of pages accessed.
+Values that are under 8,000 bytes will remain in-row. 
+Values that are greater than 8,000 bytes will be allocated as `LOB_DATA` and may incur a read/write penalty.
 
-To help enforce predictable performance, it is ideal to instead use `VARCHAR(n)`, removing the possibility of values being pushed to `LOB_DATA`.
+For example, it is ideal to use the `VARCHAR(n)` data type, as `VARCHAR(MAX)` permites 2,147,483,647 bytes (2 GB).
 Additionally, the **total row size** should not exceed 8,060 bytes if you do not want any values pushed off-row.
-Keep this in mind when specifying column lengths.
+Keep this in mind when specifying column data lengths.
 
-The following scripts can be used to compare page allocation access:
+The following scripts can be used to compare page allocation &amp; access performance:
 
-# Non-LOB rows (`VARCHAR(8000)`)
+# Non-LOB data (`VARCHAR(8000)`)
 {% highlight sql %}
 SET STATISTICS IO OFF;
 USE [TestDB]
 GO
 
-IF OBJECT_ID('[dbo].[LobTest]') IS NOT NULL
-BEGIN
-  DROP TABLE [LobTest]
-END
-GO
 CREATE TABLE dbo.LobTest
   (
     ID   INT IDENTITY(1,1) PRIMARY KEY,
     VMAX VARCHAR(MAX)
-  )  ON [PRIMARY]
+  )
 GO
 
--- Insert non-LOB rows
+-- Insert non-LOB data
 SET NOCOUNT ON;
 DECLARE @i INT = 1
 WHILE (@i < 10000)
@@ -66,9 +60,9 @@ SELECT * FROM [LobTest]
 >|:------------|:----------:|--------------:|
 >| IN_ROW_DATA | 9999       | **10037**     |
 
-# LOB rows (`VARCHAR(8001)`)
+# LOB data (`VARCHAR(8001)`)
 {% highlight sql %}
--- Update to LOB rows
+-- Update to LOB data
 SET STATISTICS IO OFF;
 UPDATE [LobTest] SET [VMAX] = REPLICATE(CONVERT(VARCHAR(MAX),'O'), 8001)
 GO
@@ -96,6 +90,7 @@ SELECT * FROM [LobTest]
 
 # Conclusion
 
-With non-LOB rows, the output resulted in 10,037 logical reads. 
-The LOB rows resulted in 29,609 logical reads, as values were then stored in the `LOB_DATA` allocation unit.
+With non-LOB data (<= 8,000 bytes), the output resulted in 10,037 logical reads. 
+Once the values were updated to 8,001 bytes, they were pushed off-row onto a `LOB_DATA` allocation unit with just a 16 byte text pointer stored in-row. 
+The LOB data resulted in significantly more logical reads (29,609) to access data that was just 1 byte larger.
 
