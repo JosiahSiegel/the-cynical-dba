@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "Move MSSQL Server Database Files"
+title: "Move MSSQL Server database files"
 permalink: move-mssql-server-database-files
 date: 2017-07-06 12:21:44
 comments: true
 description: "Move MSSQL Server database files in 4 steps."
 keywords: ""
-category: MSSQLServer
+category: MSSQL Server
 
 tags:
 

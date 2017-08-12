@@ -5,8 +5,8 @@ permalink: give-that-overgrown-table-a-gentle-purging
 date: 2017-07-27 20:33:24
 comments: true
 description: "Give that overgrown table a gentle purging"
-keywords: "MSSQLServer"
-category: MSSQLServer
+keywords: "MSSQL Server"
+category: MSSQL Server
 
 tags:
 - clean

@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "Stop Building Reporting Apps From Scratch"
+title: "Stop building reporting apps from scratch"
 permalink: stop-building-reporting-apps
 date: 2017-07-12 21:22:45
 comments: true
 description: "SSRS 2016 contains all the features you need to run a robust reporting application"
-keywords: "MSSQLServer, Reporting"
-category: MSSQLServer Reporting
+keywords: "MSSQL Server, Reporting"
+category: MSSQL Server Reporting
 tags:
 - SSRS
 

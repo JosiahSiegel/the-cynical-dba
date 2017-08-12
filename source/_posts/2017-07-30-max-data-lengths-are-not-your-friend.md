@@ -5,8 +5,8 @@ permalink: max-data-lengths-are-not-your-friend
 date: 2017-07-30 15:23:31
 comments: true
 description: "MAX data lengths are not your friend"
-keywords: "MSSQLServer"
-category: MSSQLServer
+keywords: "MSSQL Server"
+category: MSSQL Server
 
 tags:
 

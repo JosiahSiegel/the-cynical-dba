@@ -5,8 +5,8 @@ permalink: job-id-what-good-is-that
 date: 2017-07-22 16:57:58
 comments: true
 description: "Job ID? What good is that?"
-keywords: "MSSQLServer"
-category: MSSQLServer
+keywords: "MSSQL Server"
+category: MSSQL Server
 ---
 You will inevitably find yourself in many situations where you need to figure out what’s hogging server resources.
 

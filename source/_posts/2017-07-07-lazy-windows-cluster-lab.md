@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Lazy Windows Cluster Lab"
+title: "Lazy Windows cluster lab"
 permalink: lazy-windows-cluster-lab
 date: 2017-07-07 18:06:23
 comments: true

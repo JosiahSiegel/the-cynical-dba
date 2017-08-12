@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "Quick MSSQL Server Analysis"
+title: "Quick MSSQL Server analysis"
 permalink: quick-mssql-server-analysis
 date: 2017-07-08 14:59:22
 comments: true
 description: "For when everything's on fire and you need to know what's running."
-keywords: "MSSQLServer, Analysis"
-category: MSSQLServer
+keywords: "MSSQL Server, Analysis"
+category: MSSQL Server
 
 tags:
 

@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "What to do: All users are sysadmin"
+title: "What to do: all users are sysadmin"
 permalink: what-to-do-all-users-are-sysadmin
 date: 2017-07-09 19:04:24
 comments: true
 description: "A time bomb with a blast radius encompassing your career"
-keywords: "MSSQLServer, permissions"
-category: MSSQLServer
+keywords: "MSSQL Server, permissions"
+category: MSSQL Server
 tags:
 - permissions
 ---
