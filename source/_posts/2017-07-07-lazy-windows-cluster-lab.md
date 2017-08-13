@@ -11,19 +11,19 @@ tags:
 - domain
 ---
 
-For those that want a Windows cluster environment, but do not want to read through documentation that was clearly not designed for mortals such as myself.
+For those that want a Windows cluster environment, but don’t want to spend half the day installing requirements; Vagrant makes this possible with a single command.
 
-The Vagrantfile below will create a domain controller VM and two cluster node VMs based on the YAML parameters.
+The Vagrantfile below will create a domain controller VM and two cluster node VMs based on the YAML file parameters.
 Additional nodes can be added, but this should be done before running `vagrant up` for the first time.
 
-Be warned that running this environment on a single disk requires considerable throughput and I do not recommend running on your primary system disk.
+Be warned that running this environment on a single disk requires considerable throughput and I do not recommend running on your primary system disk if it's not an SSD.
 Also, security configuration is set for test use only. **NOT FOR PRODUCTION USE!**
 
 ## Basic usage:
 
  * Install Virtualbox
  * Install Vagrant (>= 1.9.4)
- * Copy Vagrantfile & user_params.yml to a directory
+ * Copy Vagrantfile & user_params.yml to the same location
  * Update the YAML file as needed
  * Run `vagrant up` or `vagrant up ClusterDC ClusterNode01 ClusterNode02`
  * The "Create cluster" provision runs on the last node VM
@@ -34,7 +34,7 @@ The domain controller houses the file share witness and all VMs are joined to th
 
 ![Windows Cluster Env](../images/win_cluster.png)
 
-**user_params.yml** - Update addresses if necessary
+**user_params.yml** - Update as necessary
 {% highlight yaml %}
 :box:            jacqinthebox/windowsserver2016
 :timezone:       Eastern Standard Time
@@ -204,7 +204,8 @@ end
 ## General Tips:
 
  * Set `:host_cache: 'on'` within the `user_params.yml` configuration file if you experience poor VM performance.
-   This may lead to considerably high host drive activity.
+   This may lead to considerably high host drive activity and host cache consumption. 
+   **Not recommended**, as high host activity can lead to even worse VM performance.
  * If the Windows license has expired, login as the **non-domain** vagrant user and run `extend-trial.cmd` on the desktop.
  * You can access each complete node using logins `<domain name>\administrator` or `<domain name>\vagrant`. 
 
@@ -235,17 +236,17 @@ end
 
    : Connection lost to VM
 
-   * Force close VM and run `vagrant up` or `vagrant up --provision` if the initial setup did not complete
+   * Force close VM and run `vagrant up <VM name>` or `vagrant up <VM name> --provision` if the initial setup did not complete
 
 3. ***Install-WindowsFeature : The FeatureType code is out of range***
 
    : Potential corrupt cache registry key
 
-   * Force close VM and run `vagrant up` or `vagrant up --provision` if the initial setup did not complete
+   * Force close VM and run `vagrant up <VM name>` or `vagrant up <VM name> --provision` if the initial setup did not complete
 
 4. ***The guest machine entered an invalid state while waiting for it to boot.***
 
    : Known to occur after the "Join domain" provision and restart
 
-   * Run `vagrant up --provision` or if you know the specific missing provision `vagrant up --provision-with "Setup storage"`
+   * Run `vagrant up <VM name> --provision` or if you know the specific missing provision `vagrant up <VM name> --provision-with "<provision name>"`
  
