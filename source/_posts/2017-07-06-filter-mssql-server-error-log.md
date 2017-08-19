@@ -12,8 +12,8 @@ tags:
 
 ---
 
-
-Insert latest error log into table variable for additional joins or complex filtering:
+While it's possible to read the SQL Server error log with T-SQL via the `sp_readerrorlog` stored procedure, it does not allow for joins or advanced filtering if more complex analysis is needed.
+Inserting the output of the error log into a table variable resolves this, as the output can now be manipulated like any other table:
 
 {% highlight sql %}
 DECLARE @temp_error_log TABLE
@@ -24,9 +24,8 @@ DECLARE @temp_error_log TABLE
 )
 
 INSERT INTO @temp_error_log
-EXEC sp_readerrorlog 0, 1, 'Login failed' 
-
-
+EXEC sp_readerrorlog 0, 1, '<log filter>'
+--Select from error log output
 SELECT * FROM @temp_error_log 
 ORDER BY date DESC
 {% endhighlight %}

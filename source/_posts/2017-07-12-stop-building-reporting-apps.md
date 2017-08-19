@@ -13,8 +13,8 @@ tags:
 ---
 SQL Server Reporting Services (SSRS); as of the 2016 edition, is now worth your attention. Mobile-friendly, HTML 5, LESS CSS, Windows Authentication, paginated reports, KPIs, email subscriptions, and more.
 
-If you’re running anything older than SQL Server 2016, STOP and upgrade. 
-If necessary, install Express 2016 to host SSRS. It will be worth the effort and it's no additional cost; although, subscriptions, KPIs, and a few other features are not available in the Express edition.
+If you’re running anything older than SQL Server 2016, you may want to consider an upgrade. 
+One option is SQL Server Express 2016; although, subscriptions, KPIs, and a few other features are not available in this free edition.
 
 SSRS 2016:
 
@@ -81,5 +81,6 @@ If you don&#39;t specify the report server during the Report Builder install, yo
 
 ---
 
-SSRS has come along way. This is the first time that I feel it can be used as a suitable replacement for custom internal reporting applications; which have a tendancy of consuming many development hours maintaining.
+SSRS has come along way.
+This is the first time that I feel it can be used as a suitable replacement for custom SQL Server reporting applications; which have a tendancy of consuming many development hours maintaining.
 
