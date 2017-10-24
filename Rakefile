@@ -100,7 +100,6 @@ task :post do
   end
 end # task :post
 
-
 desc "Create a new page."
 task :page do
   name = ENV["name"] || "new-page.md"
