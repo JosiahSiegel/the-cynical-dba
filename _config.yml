@@ -14,7 +14,6 @@ sass:
 
 cover: /assets/images/default-cover.png
 
-# site title, description, meta_description, meta_keywords
 # Details for the RSS feed generator
 name: the_cynical_dba
 title: the_cynical_dba
