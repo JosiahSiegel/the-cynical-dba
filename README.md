@@ -2,7 +2,7 @@
  1. Download or clone repo
  2. Enter the folder
  3. Install Ruby gems: bundle install
- 4. Start Jekyll server: jekyll serve
+ 4. Start Jekyll server: bundle exec jekyll serve --host=0.0.0.0
 
 Access, localhost:4000
 
