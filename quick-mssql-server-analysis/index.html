@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#">
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="theme-color" content="#2ecc71">
+<meta property="og:url" content="http://thecynicaldba.com/quick-mssql-server-analysis" />
+<title> Quick MSSQL Server analysis | the_cynical_dba</title>
+<meta property="og:title" content=" Quick MSSQL Server analysis | the_cynical_dba"/>
+<meta property="og:description" name="description" content="For when everything&#39;s on fire and you need to know what&#39;s running." />
+<meta name="keywords" content="MSSQL Server, Analysis">
+<link rel="stylesheet" href="/css/main.css">
+<link rel="canonical" href="http://thecynicaldba.com/quick-mssql-server-analysis">
+<link rel="alternate" type="application/rss+xml" title="the_cynical_dba" href="http://thecynicaldba.com/feed.xml" />
+<script type='text/javascript' src='//platform-api.sharethis.com/js/sharethis.js#property=5961447a33add90011bd1e36&product=inline-share-buttons' async='async'></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-102162987-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<script>base_url = "";</script>
+  </head>
+  <body class="single">
+    <main class="main-container">
+        <header class="site-header">
+  <div class="container txt-center">
+    <a href="#" class="nav-toogle js-menu-trigger sliding-panel-button">
+      <span></span>
+      <span></span>
+      <span></span>
+    </a>
+    <nav class="js-menu sliding-panel-content">
+      <ul>
+        <li><a href="/">home</a></li>
+        <li><a href="/author">author</a></li>
+        <li><a href="/feed.xml" target="_blank"><i class="icon icon-feed"></i> feed</a></li>
+      </ul>
+    </nav>
+    <div class="js-menu-screen sliding-panel-fade-screen"></div>
+      <h1 class="page-title">Quick MSSQL Server analysis</h1>
+      <p class="post-meta">Jul 8, 2017</p>
+  </div>
+</header>
+        <section class="main-content">
+          <article class="post">
+  <div class="post-content container">
+    <p>Many of us (or at least I hope) have go-to tools or applications to monitor database activity, but what about when you get the Monday morning call to check out a melting database instance that you never knew existed?
+What about when you’re only able to login through a DAC?</p>
+<p>Sometimes it’s best to start out by running T-SQL scripts to see what’s going on before you start making changes (adding monitoring applications and/or stored procedures).</p>
+<h3 id="running-queries-and-jobs"><strong>Running queries and jobs:</strong></h3>
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SELECT</span>
+  <span class="n">req</span><span class="p">.</span><span class="n">session_id</span> <span class="k">AS</span> <span class="p">[</span><span class="k">session</span><span class="p">],</span>
+  <span class="n">ses</span><span class="p">.</span><span class="n">program_name</span> <span class="k">AS</span> <span class="p">[</span><span class="n">program</span><span class="p">],</span>
+  <span class="n">jobs</span><span class="p">.</span><span class="n">name</span> <span class="k">AS</span> <span class="p">[</span><span class="n">job</span><span class="p">],</span>
+  <span class="n">sqltext</span><span class="p">.</span><span class="nb">TEXT</span> <span class="k">AS</span> <span class="p">[</span><span class="n">query</span><span class="p">],</span>
+  <span class="n">DB_NAME</span><span class="p">(</span><span class="n">req</span><span class="p">.</span><span class="n">database_id</span><span class="p">)</span> <span class="k">AS</span> <span class="p">[</span><span class="k">database</span><span class="p">],</span>
+  <span class="n">req</span><span class="p">.</span><span class="n">status</span><span class="p">,</span>
+  <span class="n">req</span><span class="p">.</span><span class="n">command</span><span class="p">,</span>
+  <span class="k">CONVERT</span><span class="p">(</span><span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="n">req</span><span class="p">.</span><span class="n">cpu_time</span> <span class="o">/</span> <span class="mi">86400000</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span>
+  <span class="k">CONVERT</span><span class="p">(</span><span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">((</span><span class="n">req</span><span class="p">.</span><span class="n">cpu_time</span> <span class="o">%</span> <span class="mi">86400000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600000</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span>
+  <span class="k">CONVERT</span><span class="p">(</span><span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">(((</span><span class="n">req</span><span class="p">.</span><span class="n">cpu_time</span> <span class="o">%</span> <span class="mi">86400000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3600000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60000</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span>
+  <span class="k">CONVERT</span><span class="p">(</span><span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">((((</span><span class="n">req</span><span class="p">.</span><span class="n">cpu_time</span> <span class="o">%</span> <span class="mi">86400000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3600000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">60000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span>
+  <span class="k">CONVERT</span><span class="p">(</span><span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">(((</span><span class="n">req</span><span class="p">.</span><span class="n">cpu_time</span> <span class="o">%</span> <span class="mi">86400000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3600000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1000</span><span class="p">))</span> <span class="k">AS</span> <span class="p">[</span><span class="n">cpu_DD</span><span class="p">:</span><span class="n">HH</span><span class="p">:</span><span class="n">MM</span><span class="p">:</span><span class="n">SS</span><span class="p">:</span><span class="n">MS</span><span class="p">],</span>
+  <span class="k">CONVERT</span><span class="p">(</span><span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="n">req</span><span class="p">.</span><span class="n">total_elapsed_time</span> <span class="o">/</span> <span class="mi">86400000</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span>
+  <span class="k">CONVERT</span><span class="p">(</span><span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">((</span><span class="n">req</span><span class="p">.</span><span class="n">total_elapsed_time</span> <span class="o">%</span> <span class="mi">86400000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600000</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span>
+  <span class="k">CONVERT</span><span class="p">(</span><span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">(((</span><span class="n">req</span><span class="p">.</span><span class="n">total_elapsed_time</span> <span class="o">%</span> <span class="mi">86400000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3600000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60000</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span>
+  <span class="k">CONVERT</span><span class="p">(</span><span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">((((</span><span class="n">req</span><span class="p">.</span><span class="n">total_elapsed_time</span> <span class="o">%</span> <span class="mi">86400000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3600000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">60000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span>
+  <span class="k">CONVERT</span><span class="p">(</span><span class="nb">varchar</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">(((</span><span class="n">req</span><span class="p">.</span><span class="n">total_elapsed_time</span> <span class="o">%</span> <span class="mi">86400000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3600000</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1000</span><span class="p">))</span> <span class="k">AS</span> <span class="p">[</span><span class="n">elapsed_DD</span><span class="p">:</span><span class="n">HH</span><span class="p">:</span><span class="n">MM</span><span class="p">:</span><span class="n">SS</span><span class="p">:</span><span class="n">MS</span><span class="p">],</span>
+  <span class="n">ses</span><span class="p">.</span><span class="n">login_name</span> <span class="k">AS</span> <span class="p">[</span><span class="n">login</span><span class="p">],</span>
+  <span class="n">ses</span><span class="p">.</span><span class="n">host_name</span> <span class="k">AS</span> <span class="p">[</span><span class="k">host</span><span class="p">]</span>
+<span class="k">FROM</span> <span class="n">sys</span><span class="p">.</span><span class="n">dm_exec_requests</span> <span class="n">req</span>
+<span class="k">LEFT</span> <span class="k">JOIN</span> <span class="n">sys</span><span class="p">.</span><span class="n">dm_exec_sessions</span> <span class="n">ses</span>
+  <span class="k">ON</span> <span class="n">ses</span><span class="p">.</span><span class="n">session_id</span> <span class="o">=</span> <span class="n">req</span><span class="p">.</span><span class="n">session_id</span>
+<span class="k">LEFT</span> <span class="k">JOIN</span> <span class="n">msdb</span><span class="p">.</span><span class="n">dbo</span><span class="p">.</span><span class="n">sysjobs</span> <span class="n">jobs</span>
+  <span class="k">ON</span> <span class="k">SUBSTRING</span><span class="p">(</span><span class="k">ISNULL</span><span class="p">(</span><span class="n">ses</span><span class="p">.[</span><span class="n">program_name</span><span class="p">],</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">CHARINDEX</span><span class="p">(</span><span class="s1">&#39;0x&#39;</span><span class="p">,</span> <span class="k">ISNULL</span><span class="p">(</span><span class="n">ses</span><span class="p">.[</span><span class="n">program_name</span><span class="p">],</span> <span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="o">+</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+  <span class="o">=</span> <span class="k">SUBSTRING</span><span class="p">(</span><span class="k">REPLACE</span><span class="p">(</span><span class="k">ISNULL</span><span class="p">(</span><span class="n">jobs</span><span class="p">.[</span><span class="n">job_id</span><span class="p">],</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+<span class="k">CROSS</span> <span class="n">APPLY</span> <span class="n">sys</span><span class="p">.</span><span class="n">dm_exec_sql_text</span><span class="p">(</span><span class="n">sql_handle</span><span class="p">)</span> <span class="k">AS</span> <span class="n">sqltext</span>
+<span class="k">WHERE</span> <span class="n">req</span><span class="p">.</span><span class="n">session_id</span> <span class="o">!=</span> <span class="o">@@</span><span class="n">spid</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="p">[</span><span class="n">elapsed_DD</span><span class="p">:</span><span class="n">HH</span><span class="p">:</span><span class="n">MM</span><span class="p">:</span><span class="n">SS</span><span class="p">:</span><span class="n">MS</span><span class="p">]</span> <span class="k">DESC</span>
+<span class="k">GO</span></code></pre></div>
+<p>What matters:</p>
+<p><img src="../images/running_queries.png" alt="Running Queries" class="img-border" /></p>
+<hr />
+<h3 id="file-space-for-selected-database"><strong>File space for selected database:</strong></h3>
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SELECT</span> 
+  <span class="n">DB_NAME</span><span class="p">()</span> <span class="k">AS</span> <span class="p">[</span><span class="k">database</span><span class="p">],</span> 
+  <span class="n">name</span> <span class="k">AS</span> <span class="p">[</span><span class="n">file</span><span class="p">],</span> 
+  <span class="k">size</span><span class="o">/</span><span class="mi">128</span><span class="p">.</span><span class="mi">0</span> <span class="k">AS</span> <span class="p">[</span><span class="n">size_mb</span><span class="p">],</span>  
+  <span class="k">size</span><span class="o">/</span><span class="mi">128</span><span class="p">.</span><span class="mi">0</span> <span class="o">-</span> <span class="k">CAST</span><span class="p">(</span><span class="n">FILEPROPERTY</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;SpaceUsed&#39;</span><span class="p">)</span> <span class="k">AS</span> <span class="nb">INT</span><span class="p">)</span><span class="o">/</span><span class="mi">128</span><span class="p">.</span><span class="mi">0</span> <span class="k">AS</span> <span class="p">[</span><span class="n">free_mb</span><span class="p">]</span> 
+<span class="k">FROM</span> <span class="n">sys</span><span class="p">.</span><span class="n">database_files</span><span class="p">;</span> 
+<span class="k">GO</span></code></pre></div>
+<p>What matters:</p>
+<p><img src="../images/db_file_size.png" alt="Database File Size" class="img-border" /></p>
+<hr />
+<h3 id="running-commands-with--complete"><strong>Running commands (with % complete):</strong></h3>
+<div class="highlight"><pre><code class="language-sql" data-lang="sql"><span class="k">SELECT</span>
+  <span class="n">session_id</span> <span class="k">AS</span> <span class="p">[</span><span class="k">session</span><span class="p">],</span>
+  <span class="n">DB_NAME</span><span class="p">(</span><span class="n">database_id</span><span class="p">)</span> <span class="k">AS</span> <span class="p">[</span><span class="k">database</span><span class="p">],</span>
+  <span class="n">command</span><span class="p">,</span>
+  <span class="n">percent_complete</span><span class="p">,</span>
+  <span class="k">CAST</span><span class="p">((</span><span class="n">estimated_completion_time</span> <span class="o">/</span> <span class="mi">3600000</span><span class="p">)</span> <span class="k">AS</span> <span class="nb">varchar</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; hour(s), &#39;</span>
+  <span class="o">+</span> <span class="k">CAST</span><span class="p">((</span><span class="n">estimated_completion_time</span> <span class="o">%</span> <span class="mi">3600000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60000</span> <span class="k">AS</span> <span class="nb">varchar</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;min, &#39;</span>
+  <span class="o">+</span> <span class="k">CAST</span><span class="p">((</span><span class="n">estimated_completion_time</span> <span class="o">%</span> <span class="mi">60000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">AS</span> <span class="nb">varchar</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; sec&#39;</span> <span class="k">AS</span> <span class="n">EstimatedTimeToGo</span><span class="p">,</span>
+  <span class="n">DATEADD</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span> <span class="n">estimated_completion_time</span><span class="p">,</span> <span class="n">GETDATE</span><span class="p">())</span> <span class="k">AS</span> <span class="n">EstimatedEndTime</span><span class="p">,</span>
+  <span class="n">start_time</span><span class="p">,</span>
+  <span class="n">status</span><span class="p">,</span>
+  <span class="n">cpu_time</span>
+<span class="k">FROM</span> <span class="n">sys</span><span class="p">.</span><span class="n">dm_exec_requests</span>
+<span class="k">WHERE</span> <span class="n">percent_complete</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="k">ORDER</span> <span class="k">BY</span> <span class="n">session_id</span> <span class="k">DESC</span>
+<span class="k">GO</span></code></pre></div>
+<p>What matters:</p>
+<p><img src="../images/command_status.png" alt="Command Status" class="img-border" /></p>
+<blockquote>
+  <p>This includes the following potential heavy hitters:</p>
+  <ul>
+    <li>ALTER INDEX REORGANIZE</li>
+    <li>AUTO_SHRINK option with ALTER DATABASE</li>
+    <li>BACKUP DATABASE</li>
+    <li>DBCC CHECKDB</li>
+    <li>DBCC CHECKFILEGROUP</li>
+    <li>DBCC CHECKTABLE</li>
+    <li>DBCC INDEXDEFRAG</li>
+    <li>DBCC SHRINKDATABASE</li>
+    <li>DBCC SHRINKFILE</li>
+    <li>RECOVERY</li>
+    <li>RESTORE DATABASE</li>
+    <li>ROLLBACK</li>
+    <li>TDE ENCRYPTION</li>
+  </ul>
+</blockquote>
+<p>Click <a href="https://gist.githubusercontent.com/JosiahSiegel/500d25c187f97f1737de/raw/quick_analysis.sql" target="_blank">HERE</a> for the all in one script.</p>
+    <aside class="share">
+      <div class="sharethis-inline-share-buttons"></div>
+    </aside>
+  </div>
+  <hr>
+  <aside id="comments" class="disqus">
+    <div class="container">
+      <h3><i class="icon icon-comments-o"></i> Comments</h3>
+      <div id="disqus_thread"></div>
+      <script>
+          /**
+           *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+           *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+           */
+          //var disqus_developer = 1; // Comment out when the site is live
+          var disqus_config = function () {
+              this.page.url = 'http://thecynicaldba.com/quick-mssql-server-analysis';  // Replace PAGE_URL with your page's canonical URL variable
+              this.page.identifier = '/quick-mssql-server-analysis'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+          };
+          (function() {  // DON'T EDIT BELOW THIS LINE
+              var d = document, s = d.createElement('script');
+              s.src = 'https://cynical-dba.disqus.com/embed.js';
+              s.setAttribute('data-timestamp', +new Date());
+              (d.head || d.body).appendChild(s);
+          })();
+      </script>
+      <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+    </div>
+  </aside>
+</article>
+        </section>
+<div class="clearfix"></div>
+<footer class="site-footer txt-center">
+  <hr>
+  <ul class="social">
+  </ul>
+  <svg style="position: absolute; width: 0; height: 0; overflow: hidden" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+      <symbol id="icon-mug" viewBox="0 0 32 32">
+      <title>coffee</title>
+      <path d="M30 10h-6v-3c0-2.761-5.373-5-12-5s-12 2.239-12 5v20c0 2.761 5.373 5 12 5s12-2.239 12-5v-3h6c1.105 0 2-0.895 2-2v-10c0-1.105-0.895-2-2-2zM5.502 8.075c-1.156-0.381-1.857-0.789-2.232-1.075 0.375-0.286 1.075-0.694 2.232-1.075 1.811-0.597 4.118-0.925 6.498-0.925s4.688 0.329 6.498 0.925c1.156 0.381 1.857 0.789 2.232 1.075-0.375 0.286-1.076 0.694-2.232 1.075-1.811 0.597-4.118 0.925-6.498 0.925s-4.688-0.329-6.498-0.925zM28 20h-4v-6h4v6z"></path>
+      </symbol>
+    </defs>
+  </svg>
+  <small>&copy; 2017. Made with <a href="http://jekyllrb.com" target="_blank">Jekyll</a> and <svg class="icon-mug"><use xlink:href="#icon-mug"></use></svg>.</small>
+</footer>
+    </main>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jekyll-search.min.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

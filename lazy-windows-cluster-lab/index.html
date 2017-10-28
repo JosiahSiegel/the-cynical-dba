@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#">
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="HandheldFriendly" content="True">
+<meta name="MobileOptimized" content="320">
+<meta name="theme-color" content="#2ecc71">
+<meta property="og:url" content="http://thecynicaldba.com/lazy-windows-cluster-lab" />
+<title> Lazy Windows cluster lab | the_cynical_dba</title>
+<meta property="og:title" content=" Lazy Windows cluster lab | the_cynical_dba"/>
+<meta property="og:description" name="description" content="Run your own Windows cluster lab via Vagrant." />
+<meta name="keywords" content="Windows, Cluster, Vagrant">
+<link rel="stylesheet" href="/css/main.css">
+<link rel="canonical" href="http://thecynicaldba.com/lazy-windows-cluster-lab">
+<link rel="alternate" type="application/rss+xml" title="the_cynical_dba" href="http://thecynicaldba.com/feed.xml" />
+<script type='text/javascript' src='//platform-api.sharethis.com/js/sharethis.js#property=5961447a33add90011bd1e36&product=inline-share-buttons' async='async'></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-102162987-1', 'auto');
+  ga('send', 'pageview');
+</script>
+<script>base_url = "";</script>
+  </head>
+  <body class="single">
+    <main class="main-container">
+        <header class="site-header">
+  <div class="container txt-center">
+    <a href="#" class="nav-toogle js-menu-trigger sliding-panel-button">
+      <span></span>
+      <span></span>
+      <span></span>
+    </a>
+    <nav class="js-menu sliding-panel-content">
+      <ul>
+        <li><a href="/">home</a></li>
+        <li><a href="/author">author</a></li>
+        <li><a href="/feed.xml" target="_blank"><i class="icon icon-feed"></i> feed</a></li>
+      </ul>
+    </nav>
+    <div class="js-menu-screen sliding-panel-fade-screen"></div>
+      <h1 class="page-title">Lazy Windows cluster lab</h1>
+      <p class="post-meta">Jul 7, 2017</p>
+  </div>
+</header>
+        <section class="main-content">
+          <article class="post">
+  <div class="post-content container">
+    <p>For those that want a Windows cluster environment, but don’t want to spend half the day installing requirements; Vagrant makes this possible with a single command.</p>
+<p>The Vagrantfile below will create a domain controller VM and two cluster node VMs based on the YAML file parameters.
+Additional nodes can be added, but this should be done before running <code>vagrant up</code> for the first time.</p>
+<p>Be warned that running this environment on a single disk requires considerable throughput and I do not recommend running on your primary system disk if it’s not an SSD.
+Also, security configuration is set for test use only. <strong>NOT FOR PRODUCTION USE!</strong></p>
+<h2 id="basic-usage">Basic usage:</h2>
+<ul>
+  <li>Install Virtualbox</li>
+  <li>Install Vagrant (&gt;= 1.9.4)</li>
+  <li>Copy Vagrantfile &amp; user_params.yml to the same location</li>
+  <li>Update the YAML file as needed</li>
+  <li>Run <code>vagrant up</code> or <code>vagrant up ClusterDC ClusterNode01 ClusterNode02</code></li>
+  <li>The “Create cluster” provision runs on the last node VM</li>
+</ul>
+<hr />
+<p>The domain controller houses the file share witness and all VMs are joined to the specified domain.</p>
+<p><img src="../images/win_cluster.png" alt="Windows Cluster Env" /></p>
+<p><strong>user_params.yml</strong> - Update as necessary</p>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">:box</span><span class="p-Indicator">:</span>            <span class="l-Scalar-Plain">jacqinthebox/windowsserver2016</span>
+<span class="l-Scalar-Plain">:timezone</span><span class="p-Indicator">:</span>       <span class="l-Scalar-Plain">Eastern Standard Time</span>
+<span class="l-Scalar-Plain">:boot_timeout</span><span class="p-Indicator">:</span>   <span class="l-Scalar-Plain">3000</span>
+<span class="l-Scalar-Plain">:virtualbox</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">:controller</span><span class="p-Indicator">:</span>   <span class="l-Scalar-Plain">IDE Controller</span>
+  <span class="l-Scalar-Plain">:host_cache</span><span class="p-Indicator">:</span>   <span class="s">&#39;off&#39;</span>
+<span class="l-Scalar-Plain">:dc01</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">:name</span><span class="p-Indicator">:</span>         <span class="l-Scalar-Plain">ClusterDC</span>
+  <span class="l-Scalar-Plain">:public_ip</span><span class="p-Indicator">:</span>    <span class="l-Scalar-Plain">192.168.0.210</span>
+<span class="l-Scalar-Plain">:nodes</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">:node1</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">:name</span><span class="p-Indicator">:</span>       <span class="l-Scalar-Plain">ClusterNode01</span>
+    <span class="l-Scalar-Plain">:public_ip</span><span class="p-Indicator">:</span>  <span class="l-Scalar-Plain">192.168.0.211</span>
+    <span class="l-Scalar-Plain">:private_ip</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">192.168.2.11</span>
+  <span class="l-Scalar-Plain">:node2</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">:name</span><span class="p-Indicator">:</span>       <span class="l-Scalar-Plain">ClusterNode02</span>
+    <span class="l-Scalar-Plain">:public_ip</span><span class="p-Indicator">:</span>  <span class="l-Scalar-Plain">192.168.0.212</span>
+    <span class="l-Scalar-Plain">:private_ip</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">192.168.2.12</span>
+<span class="l-Scalar-Plain">:domain</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">:name</span><span class="p-Indicator">:</span>         <span class="l-Scalar-Plain">devenv.local</span>
+  <span class="l-Scalar-Plain">:netbios_name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">DEVENV</span>
+  <span class="l-Scalar-Plain">:pass</span><span class="p-Indicator">:</span>         <span class="l-Scalar-Plain">D3vp@ss</span>
+<span class="l-Scalar-Plain">:cluster</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">:name</span><span class="p-Indicator">:</span>         <span class="l-Scalar-Plain">DevCluster</span>
+  <span class="l-Scalar-Plain">:ip</span><span class="p-Indicator">:</span>           <span class="l-Scalar-Plain">192.168.0.200</span>
+<span class="l-Scalar-Plain">:default_router</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">192.168.0.1</span></code></pre></div>
+<p><strong>Vagrantfile</strong></p>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1"># -*- mode: ruby -*-</span>
+<span class="c1"># vi: set ft=ruby :</span>
+<span class="nb">require</span> <span class="s1">&#39;yaml&#39;</span>
+<span class="no">Vagrant</span><span class="o">.</span><span class="n">require_version</span> <span class="s2">&quot;&gt;= 1.9.4&quot;</span>
+<span class="n">user_params</span> <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s1">&#39;user_params.yml&#39;</span><span class="p">)</span>
+<span class="n">cluster_nodes</span> <span class="o">=</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:nodes</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">|</span> <span class="n">value</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+<span class="n">reverse_lookup_ip</span> <span class="o">=</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:dc01</span><span class="o">][</span><span class="ss">:public_ip</span><span class="o">].</span><span class="n">sub</span><span class="p">(</span><span class="sr">/(.*)\b</span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:dc01</span><span class="o">][</span><span class="ss">:public_ip</span><span class="o">].</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">3</span><span class="o">]</span><span class="si">}</span><span class="sr">\b/i</span><span class="p">,</span> <span class="s1">&#39;\10&#39;</span><span class="p">)</span>
+<span class="n">required_plugins</span> <span class="o">=</span> <span class="sx">%w(vagrant-reload)</span>
+<span class="n">plugins_to_install</span> <span class="o">=</span> <span class="n">required_plugins</span><span class="o">.</span><span class="n">select</span> <span class="p">{</span> <span class="o">|</span><span class="n">plugin</span><span class="o">|</span> <span class="ow">not</span> <span class="no">Vagrant</span><span class="o">.</span><span class="n">has_plugin?</span> <span class="n">plugin</span> <span class="p">}</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">plugins_to_install</span><span class="o">.</span><span class="n">empty?</span>
+  <span class="nb">puts</span> <span class="s2">&quot;Installing plugins: </span><span class="si">#{</span><span class="n">plugins_to_install</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+  <span class="k">if</span> <span class="nb">system</span> <span class="s2">&quot;vagrant plugin install </span><span class="si">#{</span><span class="n">plugins_to_install</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="nb">exec</span> <span class="s2">&quot;vagrant </span><span class="si">#{</span><span class="no">ARGV</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+  <span class="k">else</span>
+    <span class="nb">abort</span> <span class="s2">&quot;Installation of one or more plugins has failed. Aborting.&quot;</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">define</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:dc01</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span> <span class="k">do</span> <span class="o">|</span><span class="n">dc</span><span class="o">|</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:box</span><span class="o">]</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">hostname</span> <span class="o">=</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:dc01</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">boot_timeout</span> <span class="o">=</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:boot_timeout</span><span class="o">]</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">winrm</span><span class="o">.</span><span class="n">transport</span> <span class="o">=</span> <span class="ss">:plaintext</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">winrm</span><span class="o">.</span><span class="n">basic_auth_only</span> <span class="o">=</span> <span class="kp">true</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="s2">&quot;public_network&quot;</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:dc01</span><span class="o">][</span><span class="ss">:public_ip</span><span class="o">]</span><span class="p">,</span> <span class="ss">auto_config</span><span class="p">:</span> <span class="kp">false</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="ss">:virtualbox</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span>
+      <span class="n">v</span><span class="o">.</span><span class="n">linked_clone</span> <span class="o">=</span> <span class="kp">true</span>
+      <span class="n">v</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span><span class="s2">&quot;storagectl&quot;</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:virtualbox</span><span class="o">][</span><span class="ss">:controller</span><span class="o">]</span><span class="p">,</span> 
+        <span class="s2">&quot;--hostiocache&quot;</span><span class="p">,</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:virtualbox</span><span class="o">][</span><span class="ss">:host_cache</span><span class="o">]]</span>
+    <span class="k">end</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Renew OS License&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;Start-Sleep -s 120; slmgr.vbs /rearm&quot;</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Configure public network&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> 
+      <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;netsh interface ipv4 set address &#39;Ethernet 2&#39; static </span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:dc01</span><span class="o">][</span><span class="ss">:public_ip</span><span class="o">]</span><span class="si">}</span><span class="s2"> \</span>
+<span class="s2">      255.255.255.0 </span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:default_router</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+      <span class="ss">privileged</span><span class="p">:</span> <span class="kp">false</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Disable firewall|Set time&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;Set-NetFirewallProfile \</span>
+<span class="s2">      -Profile Domain,Public,Private \</span>
+<span class="s2">      -Enabled False; \</span>
+<span class="s2">      Set-TimeZone </span><span class="se">\&quot;</span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:timezone</span><span class="o">]</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Install AD&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;Install-windowsfeature \</span>
+<span class="s2">      -name AD-Domain-Services \</span>
+<span class="s2">      -IncludeManagementTools \</span>
+<span class="s2">      -Source &#39;C:</span><span class="se">\\</span><span class="s2">Windows</span><span class="se">\\</span><span class="s2">WinSxS&#39;&quot;</span><span class="p">,</span>
+      <span class="ss">privileged</span><span class="p">:</span> <span class="kp">false</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Install domain&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;Install-ADDSForest \</span>
+<span class="s2">      -CreateDnsDelegation:$false \</span>
+<span class="s2">      -DatabasePath &#39;C:</span><span class="se">\\</span><span class="s2">Windows</span><span class="se">\\</span><span class="s2">NTDS&#39; \</span>
+<span class="s2">      -DomainName &#39;</span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:domain</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span><span class="si">}</span><span class="s2">&#39; \</span>
+<span class="s2">      -DomainNetbiosName &#39;</span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:domain</span><span class="o">][</span><span class="ss">:netbios_name</span><span class="o">]</span><span class="si">}</span><span class="s2">&#39; \</span>
+<span class="s2">      -safemodeadministratorpassword (convertto-securestring &#39;</span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:domain</span><span class="o">][</span><span class="ss">:pass</span><span class="o">]</span><span class="si">}</span><span class="s2">&#39; -asplaintext -force) \</span>
+<span class="s2">      -InstallDns:$true \</span>
+<span class="s2">      -LogPath &#39;C:</span><span class="se">\\</span><span class="s2">Windows</span><span class="se">\\</span><span class="s2">NTDS&#39; \</span>
+<span class="s2">      -NoRebootOnCompletion:$true \</span>
+<span class="s2">      -SysvolPath &#39;C:</span><span class="se">\\</span><span class="s2">Windows</span><span class="se">\\</span><span class="s2">SYSVOL&#39; \</span>
+<span class="s2">      -Force:$true&quot;</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:reload</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span>  <span class="s2">&quot;Create file share witness&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;New-Item </span><span class="se">\&quot;</span><span class="s2">C:</span><span class="se">\\</span><span class="s2">FileShareWitness</span><span class="se">\&quot;</span><span class="s2"> \</span>
+<span class="s2">      -type directory; \</span>
+<span class="s2">      New-SMBShare \</span>
+<span class="s2">      -Name </span><span class="se">\&quot;</span><span class="s2">FileShareWitness</span><span class="se">\&quot;</span><span class="s2"> \</span>
+<span class="s2">      -Path </span><span class="se">\&quot;</span><span class="s2">C:</span><span class="se">\\</span><span class="s2">FileShareWitness</span><span class="se">\&quot;</span><span class="s2"> \</span>
+<span class="s2">      -FullAccess </span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:domain</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span><span class="si">}</span><span class="se">\\</span><span class="s2">administrator, </span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:domain</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span><span class="si">}</span><span class="se">\\</span><span class="s2">vagrant&quot;</span>
+    <span class="n">dc</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Add reverse lookup zone&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;Start-Sleep -s 600; \</span>
+<span class="s2">      Add-DnsServerPrimaryZone \</span>
+<span class="s2">      -NetworkId &#39;</span><span class="si">#{</span><span class="n">reverse_lookup_ip</span><span class="si">}</span><span class="s2">&#39; \</span>
+<span class="s2">      -ReplicationScope Domain&quot;</span>
+  <span class="k">end</span>
+  <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.user_params</span><span class="o">[</span><span class="ss">:nodes</span><span class="o">].</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+    <span class="n">node_id</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;user_params[:nodes][:node</span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">define</span> <span class="n">node_id</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span> <span class="k">do</span> <span class="o">|</span><span class="n">node</span><span class="o">|</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:box</span><span class="o">]</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">hostname</span> <span class="o">=</span> <span class="n">node_id</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">boot_timeout</span> <span class="o">=</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:boot_timeout</span><span class="o">]</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">winrm</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:boot_timeout</span><span class="o">]</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">winrm</span><span class="o">.</span><span class="n">transport</span> <span class="o">=</span> <span class="ss">:plaintext</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">winrm</span><span class="o">.</span><span class="n">basic_auth_only</span> <span class="o">=</span> <span class="kp">true</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">winrm</span><span class="o">.</span><span class="n">retry_delay</span> <span class="o">=</span> <span class="mi">30</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">winrm</span><span class="o">.</span><span class="n">ssl_peer_verification</span> <span class="o">=</span> <span class="kp">false</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="ss">:virtualbox</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span>
+        <span class="n">v</span><span class="o">.</span><span class="n">linked_clone</span> <span class="o">=</span> <span class="kp">true</span>
+        <span class="n">v</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span><span class="s2">&quot;storagectl&quot;</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:virtualbox</span><span class="o">][</span><span class="ss">:controller</span><span class="o">]</span><span class="p">,</span> 
+          <span class="s2">&quot;--hostiocache&quot;</span><span class="p">,</span> <span class="n">user_params</span><span class="o">[</span><span class="ss">:virtualbox</span><span class="o">][</span><span class="ss">:host_cache</span><span class="o">]]</span>
+      <span class="k">end</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="s2">&quot;public_network&quot;</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="n">node_id</span><span class="o">[</span><span class="ss">:public_ip</span><span class="o">]</span><span class="p">,</span> <span class="ss">auto_config</span><span class="p">:</span> <span class="kp">false</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="s2">&quot;private_network&quot;</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="n">node_id</span><span class="o">[</span><span class="ss">:private_ip</span><span class="o">]</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="s2">&quot;forwarded_port&quot;</span><span class="p">,</span> <span class="ss">guest</span><span class="p">:</span> <span class="mi">1433</span><span class="p">,</span> <span class="ss">host</span><span class="p">:</span> <span class="mi">1433</span><span class="p">,</span> <span class="ss">protocol</span><span class="p">:</span> <span class="s2">&quot;tcp&quot;</span><span class="p">,</span> <span class="ss">auto_correct</span><span class="p">:</span> <span class="kp">true</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Renew OS License&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+        <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;Start-Sleep -s 120; slmgr.vbs /rearm&quot;</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Configure public network&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> 
+        <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;netsh interface ipv4 set address &#39;Ethernet 2&#39; static </span><span class="si">#{</span><span class="n">node_id</span><span class="o">[</span><span class="ss">:public_ip</span><span class="o">]</span><span class="si">}</span><span class="s2"> \</span>
+<span class="s2">        255.255.255.0 </span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:default_router</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="ss">privileged</span><span class="p">:</span> <span class="kp">false</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Set DNS&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+        <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;netsh interface ipv4 set dns &#39;Ethernet 2&#39; static </span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:dc01</span><span class="o">][</span><span class="ss">:public_ip</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="ss">privileged</span><span class="p">:</span> <span class="kp">false</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Install Failover Cluster&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+        <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;Install-WindowsFeature \</span>
+<span class="s2">        -Name Failover-Clustering \</span>
+<span class="s2">        -IncludeManagementTools \</span>
+<span class="s2">        -Source &#39;C:</span><span class="se">\\</span><span class="s2">Windows</span><span class="se">\\</span><span class="s2">WinSxS&#39;&quot;</span><span class="p">,</span>
+        <span class="ss">privileged</span><span class="p">:</span> <span class="kp">false</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Install NET 3_5&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+        <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;Install-WindowsFeature Net-Framework-Core \</span>
+<span class="s2">        -Source &#39;C:</span><span class="se">\\</span><span class="s2">Windows</span><span class="se">\\</span><span class="s2">WinSxS&#39;&quot;</span><span class="p">,</span>
+        <span class="ss">privileged</span><span class="p">:</span> <span class="kp">false</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Disable firewall|Set time&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+        <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;Set-NetFirewallProfile \</span>
+<span class="s2">        -Profile Domain,Public,Private \</span>
+<span class="s2">        -Enabled False; \</span>
+<span class="s2">        Set-TimeZone </span><span class="se">\&quot;</span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:timezone</span><span class="o">]</span><span class="si">}</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;Join domain&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+        <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;netdom join </span><span class="si">#{</span><span class="n">node_id</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span><span class="si">}</span><span class="s2"> /domain:</span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:domain</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:reload</span>
+      <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">equal?</span><span class="p">((</span><span class="mi">1</span><span class="o">.</span><span class="n">.user_params</span><span class="o">[</span><span class="ss">:nodes</span><span class="o">].</span><span class="n">count</span><span class="p">)</span><span class="o">.</span><span class="n">last</span><span class="p">)</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span>  <span class="s2">&quot;Create cluster&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+          <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;New-Cluster \</span>
+<span class="s2">          -Name </span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:cluster</span><span class="o">][</span><span class="ss">:name</span><span class="o">]</span><span class="si">}</span><span class="s2"> \</span>
+<span class="s2">          -NoStorage \</span>
+<span class="s2">          -Node </span><span class="si">#{</span><span class="n">cluster_nodes</span><span class="si">}</span><span class="s2"> \</span>
+<span class="s2">          -StaticAddress </span><span class="si">#{</span><span class="n">user_params</span><span class="o">[</span><span class="ss">:cluster</span><span class="o">][</span><span class="ss">:ip</span><span class="o">]</span><span class="si">}</span><span class="s2"> \</span>
+<span class="s2">          -IgnoreNetwork 10.0.2.0/24; \</span>
+<span class="s2">          Set-ClusterQuorum \</span>
+<span class="s2">          -NodeAndFileShareMajority </span><span class="se">\\\\</span><span class="s2">CLUSTERDC</span><span class="se">\\</span><span class="s2">FileShareWitness&quot;</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></div>
+<h2 id="general-tips">General Tips:</h2>
+<ul>
+  <li>Set <code>:host_cache: 'on'</code> within the <code>user_params.yml</code> configuration file if you experience poor VM performance.
+This may lead to considerably high host drive activity and host cache consumption. 
+<strong>Not recommended</strong>, as high host activity can lead to even worse VM performance.</li>
+  <li>If the Windows license has expired, login as the <strong>non-domain</strong> vagrant user and run <code>extend-trial.cmd</code> on the desktop.</li>
+  <li>You can access each complete node using logins <code>&lt;domain name&gt;\administrator</code> or <code>&lt;domain name&gt;\vagrant</code>.</li>
+</ul>
+<hr />
+<h2 id="mssql-server-failover-cluster-tips">MSSQL Server Failover Cluster Tips:</h2>
+<ul>
+  <li>Enable “AlwaysOn” for each SQL instance within configuration manager</li>
+  <li>Run SQL Server instances under static port <code>1433</code></li>
+  <li>Run SQL Server instances under a domain user</li>
+  <li>Run listener under a static port. For example: <code>192.168.0.209</code></li>
+  <li>If primary instance fails, force failover with: <code>ALTER AVAILABILITY GROUP &lt;AG Name&gt; FORCE_FAILOVER_ALLOW_DATA_LOSS;</code>.
+After primary (now secondary) instance is online after a forced failover, re-synchronize database with: <code>ALTER DATABASE &lt;Database Name&gt; SET HADR RESUME;</code></li>
+</ul>
+<hr />
+<h2 id="errors">Errors:</h2>
+<ol>
+  <li>
+    <dl>
+      <dt><strong><em>The security database on this server does not have a computer account for this workstation</em></strong></dt>
+      <dd>
+        <p>May occur when logging into node server if domain controller server is built/rebuilt afterwards</p>
+      </dd>
+    </dl>
+    <ul>
+      <li>
+        <p>Login with local account and remove server from domain: <code>netdom remove &lt;server_name&gt; /force</code></p>
+      </li>
+      <li>
+        <p>Rejoin server to domain: <code>netdom join &lt;server_name&gt; /domain:&lt;domain_name&gt;</code></p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <dl>
+      <dt><strong><em>Timed out while waiting for the machine to boot.</em></strong></dt>
+      <dd>
+        <p>Connection lost to VM</p>
+      </dd>
+    </dl>
+    <ul>
+      <li>Force close VM and run <code>vagrant up &lt;VM name&gt;</code> or <code>vagrant up &lt;VM name&gt; --provision</code> if the initial setup did not complete</li>
+    </ul>
+  </li>
+  <li>
+    <dl>
+      <dt><strong><em>Install-WindowsFeature : The FeatureType code is out of range</em></strong></dt>
+      <dd>
+        <p>Potential corrupt cache registry key</p>
+      </dd>
+    </dl>
+    <ul>
+      <li>Force close VM and run <code>vagrant up &lt;VM name&gt;</code> or <code>vagrant up &lt;VM name&gt; --provision</code> if the initial setup did not complete</li>
+    </ul>
+  </li>
+  <li>
+    <dl>
+      <dt><strong><em>The guest machine entered an invalid state while waiting for it to boot.</em></strong></dt>
+      <dd>
+        <p>Known to occur after the “Join domain” provision and restart</p>
+      </dd>
+    </dl>
+    <ul>
+      <li>Run <code>vagrant up &lt;VM name&gt; --provision</code> or if you know the specific missing provision <code>vagrant up &lt;VM name&gt; --provision-with "&lt;provision name&gt;"</code></li>
+    </ul>
+  </li>
+</ol>
+    <aside class="share">
+      <div class="sharethis-inline-share-buttons"></div>
+    </aside>
+  </div>
+  <hr>
+  <aside id="comments" class="disqus">
+    <div class="container">
+      <h3><i class="icon icon-comments-o"></i> Comments</h3>
+      <div id="disqus_thread"></div>
+      <script>
+          /**
+           *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+           *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+           */
+          //var disqus_developer = 1; // Comment out when the site is live
+          var disqus_config = function () {
+              this.page.url = 'http://thecynicaldba.com/lazy-windows-cluster-lab';  // Replace PAGE_URL with your page's canonical URL variable
+              this.page.identifier = '/lazy-windows-cluster-lab'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+          };
+          (function() {  // DON'T EDIT BELOW THIS LINE
+              var d = document, s = d.createElement('script');
+              s.src = 'https://cynical-dba.disqus.com/embed.js';
+              s.setAttribute('data-timestamp', +new Date());
+              (d.head || d.body).appendChild(s);
+          })();
+      </script>
+      <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+    </div>
+  </aside>
+</article>
+        </section>
+<div class="clearfix"></div>
+<footer class="site-footer txt-center">
+  <hr>
+  <ul class="social">
+  </ul>
+  <svg style="position: absolute; width: 0; height: 0; overflow: hidden" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+      <symbol id="icon-mug" viewBox="0 0 32 32">
+      <title>coffee</title>
+      <path d="M30 10h-6v-3c0-2.761-5.373-5-12-5s-12 2.239-12 5v20c0 2.761 5.373 5 12 5s12-2.239 12-5v-3h6c1.105 0 2-0.895 2-2v-10c0-1.105-0.895-2-2-2zM5.502 8.075c-1.156-0.381-1.857-0.789-2.232-1.075 0.375-0.286 1.075-0.694 2.232-1.075 1.811-0.597 4.118-0.925 6.498-0.925s4.688 0.329 6.498 0.925c1.156 0.381 1.857 0.789 2.232 1.075-0.375 0.286-1.076 0.694-2.232 1.075-1.811 0.597-4.118 0.925-6.498 0.925s-4.688-0.329-6.498-0.925zM28 20h-4v-6h4v6z"></path>
+      </symbol>
+    </defs>
+  </svg>
+  <small>&copy; 2017. Made with <a href="http://jekyllrb.com" target="_blank">Jekyll</a> and <svg class="icon-mug"><use xlink:href="#icon-mug"></use></svg>.</small>
+</footer>
+    </main>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jekyll-search.min.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>
