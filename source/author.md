@@ -11,5 +11,8 @@ Josiah Siegel
 </div>
 
 <br/>
+![Microsoft Certified Solutions Expert](../images/MCSE_DataMgmtAnalytics-logo-Blk.png){:width="120px" class="img-center"}
+
+<br/>
 ![Microsoft Certified Solutions Associate](../images/MCSA SQL 2016-DataAdmin-logo-Blk.png){:width="120px" class="img-center"}
 
